@@ -34,20 +34,38 @@ function Timer(timer, lap_tag, left, right, laps) {
 
   );
 
-  this.state        = 0; // 0: reset || 1: active || 2: stopped
-  this.state_last   = 0;
-  this.start_time   = null;
-  this.elapsed_time = null;
-  this.laps         = [];
+  this.state         = 0; // 0: reset || 1: active || 2: stopped
+  this.state_changed = false;
+  this.start_time    = null;
+  this.elapsed_time  = null;
+  this.laps          = [];
 }
 
 Timer.prototype.start = function() {
   this.start_time = 0;
   this.state = 1;
+  this.state_changed = true;
 }
 
 Timer.prototype.stop = function() {
   this.state = 2;
+  this.state_changed = true;
+}
+
+Timer.prototype.reset = function() {
+  // Set state to reset
+  this.state = 0;
+  this.state_changed = true;
+
+  // Reset this.start_time
+  this.start_time   = 0;
+  this.elapsed_time = 0;
+
+  // Clear laps
+  this.laps.length = 0;
+  this.dom_laps.innerHTML = "";
+
+  this.draw(true);
 }
 
 Timer.prototype.lap = function() {
@@ -66,44 +84,32 @@ Timer.prototype.lap = function() {
   this.laps.push(dom_lap);
 }
 
-Timer.prototype.reset = function() {
-  // Set state to reset
-  this.state = 0;
-
-  // Reset this.start_time
-  this.start_time   = 0;
-  this.elapsed_time = 0;
-
-  // Clear laps
-  this.laps.length = 0;
-
-  this.draw(true);
-}
-
 Timer.prototype.draw  = function(reset) {
-  // Convert this.start_time to string
-  var timer = this.convert(new Date(this.elapsed_time));
+  if(this.state == 1) { // active
+    // Convert this.start_time to string
+    var timer = this.convert(new Date(this.elapsed_time));
 
-  // Update timer html with string
-  this.dom_timer.innerHTML = timer;
+    // Update timer html with string
+    this.dom_timer.innerHTML = timer;
+  }
 
   // If state is changed, redraw...
-  if(this.state !== this.state_last) {
-    // Reset state
-    if(this.state === 0) {
+  if(this.state_changed) {
+    console.log(this.state);
+    if(this.state == 0) { // reset
       this.dom_left.innerHTML  = "Lap";
       this.dom_right.innerHTML = "Start";
     }
-    else if(this.state === 1) {
+    if(this.state == 1) { // active
       this.dom_left.innerHTML  = "Lap";
       this.dom_right.innerHTML = "Stop";
     }
-    else if(this.state === 2) {
+    if(this.state == 2) { // stopped
       this.dom_left.innerHTML = "Reset";
       this.dom_right.innerHTML = "Start";
     }
 
-    this.state_last = this.state;
+    this.state_changed = false;
   }
 }
 
@@ -138,9 +144,9 @@ function loop() {
   // If timer is currently active
   if(timer.state === 1) {
     timer.update(elapsed);
-    timer.draw();
   }
 
+  timer.draw();
   requestAnimationFrame(loop);
 }
 
