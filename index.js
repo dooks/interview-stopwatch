@@ -1,3 +1,4 @@
+// Timer Class
 function Timer(timer, lap_tag, reset, start, laps) {
   this.dom_timer   = timer;
   this.dom_lap_tag = lap_tag;
@@ -5,13 +6,15 @@ function Timer(timer, lap_tag, reset, start, laps) {
   this.dom_start   = start;
   this.dom_laps    = laps;
 
+  this.started      = false;
   this.start_time   = null;
   this.elapsed_time = null;
   this.laps    = [];
 }
 
 Timer.prototype.start = function() {
-  this.start_time = Date.now() - Date.now();
+  this.start_time = 0;
+  this.started = true;
 }
 
 Timer.prototype.lap   = function() {
@@ -31,6 +34,8 @@ Timer.prototype.lap   = function() {
 }
 
 Timer.prototype.reset = function() {
+  this.started = false;
+
   // Reset this.start_time
   this.start_time   = null;
   this.elapsed_time = null;
@@ -38,7 +43,8 @@ Timer.prototype.reset = function() {
   // Clear laps
   this.laps.length = 0;
 }
-Timer.prototype.draw  = function() {
+
+Timer.prototype.draw  = function(reset) {
   // Convert this.start_time to string
   if(this.start_time === null) {
     this.dom_timer.innerHTML = "00:00:00";
@@ -95,6 +101,8 @@ timer.start();
 //var elapsed_time = 0;
 function loop() {
   //elapsed = Date.now() - last;
+  if(timer.started) {
+  }
 
   //last = Date.now();
   timer.update();
