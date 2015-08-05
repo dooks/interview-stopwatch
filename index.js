@@ -8,7 +8,7 @@ function Timer(timer, lap_tag, reset, start, laps) {
   this.started      = false;
   this.start_time   = null;
   this.elapsed_time = null;
-  this.laps    = [];
+  this.laps         = [];
 }
 
 Timer.prototype.start = function() {
@@ -42,14 +42,17 @@ Timer.prototype.reset = function() {
   // Clear laps
   this.laps.length = 0;
 }
+
 Timer.prototype.draw  = function(reset) {
   // Convert this.start_time to string
   if(this.start_time === null) {
     this.dom_timer.innerHTML = "00:00:00";
+
   } else {
     var timer = this.convert(new Date(this.elapsed_time));
     // Update timer html with string
     this.dom_timer.innerHTML = timer;
+
   }
 
   // For each lap, convert to string and display
@@ -58,6 +61,7 @@ Timer.prototype.draw  = function(reset) {
     this.laps[0][i].innerHTML = lap;
   }
 }
+
 Timer.prototype.convert = function(date) {
   // @date: Date object
   var retval = date.getMinutes() + " : "
@@ -65,12 +69,11 @@ Timer.prototype.convert = function(date) {
                + date.getMilliseconds();
   return retval;
 }
+
 Timer.prototype.update = function(elapsed) {
   this.elapsed_time += elapsed;
 }
 
-
-// Testing
 var timer = new Timer(
   document.getElementById("stop-timer"),          // timer
   document.getElementById("stop-lap-tag"),        // lap_tag
@@ -79,23 +82,9 @@ var timer = new Timer(
   document.getElementById("stop-laps-list")       // laps
 );
 timer.start();
-//timer.elapsed_time = timer.start_time;
-//timer.draw();
-
-// Add 20 ms
-//timer.elapsed_time += 20;
-//timer.draw();
-
-// Add 20 seconds
-//timer.elapsed_time += 100 * 20;
-//timer.draw();
-
-// Add one minute
-//timer.elapsed_time += 10000 * 20;
-//timer.draw();
 
 // Main loop
-var last = Date.now();
+var last    = Date.now();
 var elapsed = 0;
 function loop() {
   elapsed = Date.now() - last;
@@ -108,4 +97,5 @@ function loop() {
 
   requestAnimationFrame(loop);
 }
+
 loop();
