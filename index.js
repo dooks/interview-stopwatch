@@ -5,6 +5,7 @@ function Timer(timer, lap_tag, reset, start, laps) {
   this.dom_start   = start;
   this.dom_laps    = laps;
 
+  this.started      = false;
   this.start_time   = null;
   this.elapsed_time = null;
   this.laps    = [];
@@ -12,6 +13,7 @@ function Timer(timer, lap_tag, reset, start, laps) {
 
 Timer.prototype.start = function() {
   this.start_time = 0;
+  this.started = true;
 }
 
 Timer.prototype.lap   = function() {
@@ -31,6 +33,8 @@ Timer.prototype.lap   = function() {
 }
 
 Timer.prototype.reset = function() {
+  this.started = false;
+
   // Reset this.start_time
   this.start_time   = null;
   this.elapsed_time = null;
@@ -38,7 +42,7 @@ Timer.prototype.reset = function() {
   // Clear laps
   this.laps.length = 0;
 }
-Timer.prototype.draw  = function() {
+Timer.prototype.draw  = function(reset) {
   // Convert this.start_time to string
   if(this.start_time === null) {
     this.dom_timer.innerHTML = "00:00:00";
@@ -54,7 +58,6 @@ Timer.prototype.draw  = function() {
     this.laps[0][i].innerHTML = lap;
   }
 }
-
 Timer.prototype.convert = function(date) {
   // @date: Date object
   var retval = date.getMinutes() + " : "
@@ -62,7 +65,6 @@ Timer.prototype.convert = function(date) {
                + date.getMilliseconds();
   return retval;
 }
-
 Timer.prototype.update = function(elapsed) {
   this.elapsed_time += elapsed;
 }
@@ -99,10 +101,11 @@ function loop() {
   elapsed = Date.now() - last;
   last = Date.now();
 
-  timer.update(elapsed);
-  timer.draw();
+  if(timer.started) {
+    timer.update(elapsed);
+    timer.draw();
+  }
 
   requestAnimationFrame(loop);
 }
-
 loop();
