@@ -1,9 +1,9 @@
-function Timer(timer, lap_tag, left, right, laps) {
-  this.dom_timer   = timer;
-  this.dom_lap_tag = lap_tag;
-  this.dom_left    = left;
-  this.dom_right   = right;
-  this.dom_laps    = laps;
+function Timer(timer, timer_lap, left, right, laps) {
+  this.dom_timer     = timer;
+  this.dom_timer_lap = timer_lap;
+  this.dom_left      = left;
+  this.dom_right     = right;
+  this.dom_laps      = laps;
 
   // Add click events for left and right timer buttons
   this.dom_left.addEventListener("click",
@@ -36,8 +36,9 @@ function Timer(timer, lap_tag, left, right, laps) {
 
   this.state         = 0; // 0: reset || 1: active || 2: stopped
   this.state_changed = false;
-  this.start_time    = null;
-  this.elapsed_time  = null;
+  this.start_time    = 0;
+  this.elapsed_time  = 0;
+  this.elapsed_laps   = 0;
   this.laps          = [];
 }
 
@@ -60,6 +61,7 @@ Timer.prototype.reset = function() {
   // Reset this.start_time
   this.start_time   = 0;
   this.elapsed_time = 0;
+  this.elapsed_laps = 0;
 
   // Clear laps
   this.laps.length = 0;
@@ -69,8 +71,9 @@ Timer.prototype.reset = function() {
 }
 
 Timer.prototype.lap = function() {
-  // Save elapsed_time time
-  var now = this.convert(new Date(this.elapsed_time));
+  // Save elapsed_time
+  var now = this.convert(new Date(this.elapsed_laps));
+  this.elapsed_laps = 0;
 
   // Create new DOM element
   var dom_lap  = document.createElement("li");
@@ -87,10 +90,12 @@ Timer.prototype.lap = function() {
 Timer.prototype.draw  = function(reset) {
   if(this.state == 1) { // active
     // Convert this.start_time to string
-    var timer = this.convert(new Date(this.elapsed_time));
+    var timer     = this.convert(new Date(this.elapsed_time));
+    var timer_lap = this.convert(new Date(this.elapsed_laps));
 
     // Update timer html with string
     this.dom_timer.innerHTML = timer;
+    this.dom_timer_lap.innerHTML = timer_lap;
   }
 
   // If state is changed, redraw...
@@ -122,13 +127,14 @@ Timer.prototype.convert = function(date) {
 }
 
 Timer.prototype.update = function(elapsed) {
+  this.elapsed_laps += elapsed;
   this.elapsed_time += elapsed;
 }
 
 var timer = new Timer(
   document.getElementById("stop-timer"),          // timer
-  document.getElementById("stop-lap-tag"),        // lap_tag
-  document.getElementById("stop-controls-left"), // reset
+  document.getElementById("stop-timer-lap"),      // lap_tag
+  document.getElementById("stop-controls-left"),  // reset
   document.getElementById("stop-controls-right"), // start
   document.getElementById("stop-laps-list")       // laps
 );
