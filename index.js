@@ -1,11 +1,41 @@
-function Timer(timer, lap_tag, reset, start, laps) {
+function Timer(timer, lap_tag, left, right, laps) {
   this.dom_timer   = timer;
   this.dom_lap_tag = lap_tag;
-  this.dom_reset   = reset;
-  this.dom_start   = start;
+  this.dom_left    = left;
+  this.dom_right   = right;
   this.dom_laps    = laps;
 
-  this.started      = false;
+  // Add click events for left and right timer buttons
+  this.dom_left.addEventListener("click",
+    (function(self) {
+      return function(e) {
+        // Left button toggles between lap and reset buttons
+        // Ignore reset state
+        if(self.state === 1) { // active
+          self.lap();
+        } else if (self.state === 2) { // stopped
+          self.reset();
+        }
+      }
+    })(this)
+
+  );
+  this.dom_right.addEventListener("click",
+    (function(self) {
+      return function(e) {
+        // Left button toggles between start and stop buttons
+        if(self.state === 1) { // active
+          self.stop();
+        } else { // reset or stopped
+          self.start();
+        }
+      }
+    })(this)
+
+  );
+
+  this.state        = 0; // 0: reset || 1: active || 2: stopped
+  this.state_last   = 0;
   this.start_time   = null;
   this.elapsed_time = null;
   this.laps         = [];
@@ -13,52 +43,67 @@ function Timer(timer, lap_tag, reset, start, laps) {
 
 Timer.prototype.start = function() {
   this.start_time = 0;
-  this.started = true;
+  this.state = 1;
 }
 
-Timer.prototype.lap   = function() {
+Timer.prototype.stop = function() {
+  this.state = 2;
+}
+
+Timer.prototype.lap = function() {
   // Save elapsed_time time
-  var now = this.elapsed_time;
+  var now = this.convert(new Date(this.elapsed_time));
 
   // Create new DOM element
   var dom_lap  = document.createElement("li");
-  //var dom_text = document.createTextNode(now);
-  //dom_lap.appendChild(dom_text);
+  var dom_text = document.createTextNode(now);
+  dom_lap.appendChild(dom_text);
 
   // Append to dom_laps
-  this.dom_laps.appendChild(dom_lap);
+  this.dom_laps.insertBefore(dom_lap, this.dom_laps.firstChild);
 
   // Deep copy elapsed_time time into this.laps
   this.laps.push(dom_lap);
 }
 
 Timer.prototype.reset = function() {
-  this.started = false;
+  // Set state to reset
+  this.state = 0;
 
   // Reset this.start_time
-  this.start_time   = null;
-  this.elapsed_time = null;
+  this.start_time   = 0;
+  this.elapsed_time = 0;
 
   // Clear laps
   this.laps.length = 0;
+
+  this.draw(true);
 }
 
 Timer.prototype.draw  = function(reset) {
   // Convert this.start_time to string
-  if(this.start_time === null) {
-    this.dom_timer.innerHTML = "00:00:00";
+  var timer = this.convert(new Date(this.elapsed_time));
 
-  } else {
-    var timer = this.convert(new Date(this.elapsed_time));
-    // Update timer html with string
-    this.dom_timer.innerHTML = timer;
+  // Update timer html with string
+  this.dom_timer.innerHTML = timer;
 
-  }
+  // If state is changed, redraw...
+  if(this.state !== this.state_last) {
+    // Reset state
+    if(this.state === 0) {
+      this.dom_left.innerHTML  = "Lap";
+      this.dom_right.innerHTML = "Start";
+    }
+    else if(this.state === 1) {
+      this.dom_left.innerHTML  = "Lap";
+      this.dom_right.innerHTML = "Stop";
+    }
+    else if(this.state === 2) {
+      this.dom_left.innerHTML = "Reset";
+      this.dom_right.innerHTML = "Start";
+    }
 
-  // For each lap, convert to string and display
-  for(var i = 0; i < this.laps; i++) {
-    var lap = this.convert(this.laps[1][i]);
-    this.laps[0][i].innerHTML = lap;
+    this.state_last = this.state;
   }
 }
 
@@ -77,11 +122,11 @@ Timer.prototype.update = function(elapsed) {
 var timer = new Timer(
   document.getElementById("stop-timer"),          // timer
   document.getElementById("stop-lap-tag"),        // lap_tag
-  document.getElementById("stop-controls-reset"), // reset
-  document.getElementById("stop-start"),          // start
+  document.getElementById("stop-controls-left"), // reset
+  document.getElementById("stop-controls-right"), // start
   document.getElementById("stop-laps-list")       // laps
 );
-timer.start();
+timer.reset();
 
 // Main loop
 var last    = Date.now();
@@ -90,7 +135,8 @@ function loop() {
   elapsed = Date.now() - last;
   last = Date.now();
 
-  if(timer.started) {
+  // If timer is currently active
+  if(timer.state === 1) {
     timer.update(elapsed);
     timer.draw();
   }
