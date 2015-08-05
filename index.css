@@ -1,0 +1,32 @@
+html, body {
+  width: 100%;
+}
+
+#viewport {
+  width: 50%;
+  margin: 0 auto;
+}
+
+#viewport div {
+  text-align: center;
+}
+
+#stop-title h1 { }
+
+#stop-container {
+  width: 50%;
+  margin: 0 auto;
+}
+  #stop-timer { font-size: 3em; }
+
+#stop-controls button {
+  width: 70px;
+}
+
+#stop-laps-list {
+  padding: 0;
+}
+
+#stop-laps-list li {
+  list-style-type: none;
+}
