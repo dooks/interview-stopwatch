@@ -11,7 +11,7 @@ function Timer(timer, lap_tag, reset, start, laps) {
 }
 
 Timer.prototype.start = function() {
-  this.start_time = Date.now() - Date.now();
+  this.start_time = 0;
 }
 
 Timer.prototype.lap   = function() {
@@ -54,6 +54,7 @@ Timer.prototype.draw  = function() {
     this.laps[0][i].innerHTML = lap;
   }
 }
+
 Timer.prototype.convert = function(date) {
   // @date: Date object
   var retval = date.getMinutes() + " : "
@@ -61,8 +62,9 @@ Timer.prototype.convert = function(date) {
                + date.getMilliseconds();
   return retval;
 }
-Timer.prototype.update = function() {
-  this.elapsed_time = Date.now() - this.start_time;
+
+Timer.prototype.update = function(elapsed) {
+  this.elapsed_time += elapsed;
 }
 
 
@@ -78,26 +80,29 @@ timer.start();
 //timer.elapsed_time = timer.start_time;
 //timer.draw();
 
-//// Add 20 ms
-//var ms = timer.start_time + 20;
-//timer.elapsed_time = ms;
+// Add 20 ms
+//timer.elapsed_time += 20;
 //timer.draw();
 
-//// Add 20 seconds
-//var sec = timer.elapsed_time + (1000 * 20);
-//timer.elapsed_time = ms;
+// Add 20 seconds
+//timer.elapsed_time += 100 * 20;
 //timer.draw();
 
 // Add one minute
+//timer.elapsed_time += 10000 * 20;
+//timer.draw();
 
 // Main loop
-//var last = Date.now();
-//var elapsed_time = 0;
+var last = Date.now();
+var elapsed = 0;
 function loop() {
-  //elapsed = Date.now() - last;
+  elapsed = Date.now() - last;
+  last = Date.now();
 
-  //last = Date.now();
-  timer.update();
+  timer.update(elapsed);
+  timer.draw();
+
   requestAnimationFrame(loop);
 }
+
 loop();
