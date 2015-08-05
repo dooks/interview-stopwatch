@@ -88,6 +88,12 @@ Timer.prototype.lap = function() {
 }
 
 Timer.prototype.draw  = function(reset) {
+  if(reset) {
+    // Timer should be redrawn to 00:00.00
+    this.dom_timer.innerHTML     = "00:00.00";
+    this.dom_timer_lap.innerHTML = "00:00.00";
+  }
+
   if(this.state == 1) { // active
     // Convert this.start_time to string
     var timer     = this.convert(new Date(this.elapsed_time));
@@ -120,8 +126,10 @@ Timer.prototype.draw  = function(reset) {
 
 Timer.prototype.convert = function(date) {
   // @date: Date object
-  var retval = date.getMinutes() + " : "
-               + date.getSeconds() + " : "
+  function pad(n) { return ( n < 10 ? '0' : '') + n; }
+  var retval = pad(date.getMinutes()) + ":"
+               + pad(date.getSeconds()) + "."
+               // Round ms to 2 decimal places
                + date.getMilliseconds();
   return retval;
 }
